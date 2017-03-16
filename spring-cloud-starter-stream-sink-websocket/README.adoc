@@ -19,8 +19,7 @@ To verify that the websocket-sink receives messages from other spring-cloud-stre
 following simple end-to-end setup.
 
 
-=== Step 1: Start Redis
-The default broker that is used is Redis. Normally can start Redis via `redis-server`.
+=== Step 1: Start Rabbitmq
 
 === Step 2: Deploy a `time-source`
 
