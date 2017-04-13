@@ -5,7 +5,7 @@
 
 	<groupId>org.springframework.cloud.stream.app</groupId>
 	<artifactId>websocket-app-dependencies</artifactId>
-	<version>1.2.0.RELEASE</version>
+	<version>1.2.1.BUILD-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>websocket-app-dependencies</name>
 	<description>Spring Cloud Stream Websocket App Dependencies</description>
@@ -26,7 +26,7 @@
 			<dependency>
 				<groupId>org.springframework.cloud.stream.app</groupId>
 				<artifactId>spring-cloud-starter-stream-sink-websocket</artifactId>
-				<version>1.2.0.RELEASE</version>
+				<version>1.2.1.BUILD-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>io.netty</groupId>
