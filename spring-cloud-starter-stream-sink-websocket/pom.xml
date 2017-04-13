@@ -11,7 +11,7 @@
 	<parent>
 		<groupId>org.springframework.cloud.stream.app</groupId>
 		<artifactId>websocket-app-starters-build</artifactId>
-		<version>1.2.0.BUILD-SNAPSHOT</version>
+		<version>1.2.0.RELEASE</version>
 	</parent>
 
 	<dependencies>
@@ -30,7 +30,7 @@
 			<dependency>
 				<groupId>org.springframework.cloud.stream.app</groupId>
 				<artifactId>websocket-app-dependencies</artifactId>
-				<version>1.2.0.BUILD-SNAPSHOT</version>
+				<version>1.2.0.RELEASE</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
