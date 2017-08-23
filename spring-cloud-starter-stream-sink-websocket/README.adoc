@@ -3,6 +3,18 @@
 
 A simple Websocket Sink implementation.
 
+== Input
+
+=== Headers
+
+=== Payload
+
+Any
+
+== Output
+
+N/A
+
 == Options
 The following commmand line arguments are supported:
 
@@ -14,7 +26,21 @@ $$websocket.ssl$$:: $$whether or not to create a {@link io.netty.handler.ssl.Ssl
 $$websocket.threads$$:: $$the number of threads for the Netty {@link io.netty.channel.EventLoopGroup}. Default is <tt>1</tt>$$ *($$Integer$$, default: `$$1$$`)*
 //end::configuration-properties[]
 
-== Example
+//end::ref-doc[]
+
+== Build
+
+```
+$ ./mvnw clean install -PgenerateApps
+$ cd apps
+```
+You can find the corresponding binder based projects here.
+You can then cd into one one of the folders and build it:
+```
+$ ./mvnw clean package
+```
+
+== Examples
 To verify that the websocket-sink receives messages from other spring-cloud-stream apps, you can use the
 following simple end-to-end setup.
 
@@ -77,10 +103,6 @@ NOTE: For SSL mode (`--ssl=true`) a self signed certificate is used that might c
 Websocket clients. In a future release, there will be a `--certificate=mycert.cer` switch to pass a valid (not
 self-signed) certificate.
 
-//end::ref-doc[]
 
-== Build
 
-```
-$ mvn clean package
-```
+
