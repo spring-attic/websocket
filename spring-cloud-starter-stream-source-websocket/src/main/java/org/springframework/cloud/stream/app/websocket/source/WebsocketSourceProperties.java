@@ -11,7 +11,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("websocket")
 public class WebsocketSourceProperties {
 
-	public static final String DEFAULT_PATH = "/test";
+	public static final String DEFAULT_PATH = "/websocket";
 
 	/**
 	 * the path on which a WebsocketSource consumer needs to connect. Default is
