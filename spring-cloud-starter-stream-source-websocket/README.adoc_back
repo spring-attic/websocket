@@ -1,0 +1,56 @@
+//tag::ref-doc[]
+= Websocket Source
+
+A simple Websocket Source implementation using spring integration project.
+
+== Input
+
+=== Headers
+
+=== Payload
+
+Any
+
+== Output
+
+N/A
+
+== Options
+The following commmand line arguments are supported:
+
+//tag::configuration-properties[]
+$$websocket.path$$:: $$the path on which a WebsocketSource app listens. Default is <tt>/websocket</tt>$$ *($$String$$, default: `$$/websocket$$`)*
+$$server.port$$:: $$the port on which the Websocket server listens.
+//end::configuration-properties[]
+
+== Build
+
+```
+$ ./mvnw clean install -PgenerateApps
+$ cd apps
+```
+You can find the corresponding binder based projects here.
+You can then cd into one of the folders and build it:
+
+```
+$ ./mvnw clean package
+```
+
+== Examples
+To verify that the websocket-source receives messages from Websocket clients, you can use the
+following simple end-to-end setup.
+
+
+=== Step 1: Start kafka
+
+=== Step 2: Deploy a `websocket-source` on a specific port, say 8080
+
+=== Step 3: Connect a websocket client on port 8080 path "/websocket", and send some messages. You can  start a kafka console consumer and see the messages there.
+
+```
+java -jar <spring boot application for websocket-source> --spring.cloud.stream.bindings.output.destination=ws-source-test --server.port=8080 
+
+```
+
+
+//end::ref-doc[]
