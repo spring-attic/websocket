@@ -1,0 +1,33 @@
+//tag::ref-doc[]
+= Websocket Source
+
+A simple Websocket Source implementation using spring integration project.
+
+== Input
+
+=== Headers
+
+=== Payload
+
+Any
+
+== Output
+
+N/A
+
+== Options
+
+The following commmand line arguments are supported:
+
+
+
+*//tag::configuration-properties[]
+$$websocket.path$$:: $$the path on which a WebsocketSource app listens. Default is <tt>/websocket</tt>$$ *($$String$$, default: `$$/websocket$$`)*
+$$server.port$$:: $$the port on which the Websocket server listens.
+*//end::configuration-properties[]
+
+
+
+== Build
+
+//end::ref-doc[]
