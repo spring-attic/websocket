@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 the original author or authors.
+ * Copyright 2014-2018 the original author or authors.
  *
  * The Netty Project licenses this file to you under the Apache License,
  * version 2.0 (the "License"); you may not use this file except in compliance
@@ -17,7 +17,7 @@
 
 package org.springframework.cloud.stream.app.websocket.sink;
 
-import static io.netty.handler.codec.http.HttpHeaders.Names.HOST;
+import static io.netty.handler.codec.http.HttpHeaderNames.HOST;
 import static io.netty.handler.codec.http.HttpMethod.GET;
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static io.netty.handler.codec.http.HttpResponseStatus.FORBIDDEN;
@@ -40,7 +40,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpUtil;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.PingWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.PongWebSocketFrame;
@@ -56,6 +56,7 @@ import io.netty.util.CharsetUtil;
  * @author Netty Project
  * @author Oliver Moser
  * @author Gary Russell
+ * @author Artem Bilan
  */
 class WebsocketSinkServerHandler extends SimpleChannelInboundHandler<Object> {
 
@@ -70,8 +71,8 @@ class WebsocketSinkServerHandler extends SimpleChannelInboundHandler<Object> {
 	private WebSocketServerHandshaker handshaker;
 
 	public WebsocketSinkServerHandler(TraceRepository websocketTraceRepository,
-									  WebsocketSinkProperties properties,
-									  boolean traceEnabled) {
+			WebsocketSinkProperties properties,
+			boolean traceEnabled) {
 
 		this.websocketTraceRepository = websocketTraceRepository;
 		this.properties = properties;
@@ -82,7 +83,8 @@ class WebsocketSinkServerHandler extends SimpleChannelInboundHandler<Object> {
 	public void channelRead0(ChannelHandlerContext ctx, Object msg) {
 		if (msg instanceof FullHttpRequest) {
 			handleHttpRequest(ctx, (FullHttpRequest) msg);
-		} else if (msg instanceof WebSocketFrame) {
+		}
+		else if (msg instanceof WebSocketFrame) {
 			handleWebSocketFrame(ctx, (WebSocketFrame) msg);
 		}
 	}
@@ -94,15 +96,15 @@ class WebsocketSinkServerHandler extends SimpleChannelInboundHandler<Object> {
 
 	private void handleHttpRequest(ChannelHandlerContext ctx, FullHttpRequest req) {
 		// Handle a bad request.
-		if (!req.getDecoderResult().isSuccess()) {
-			logger.warn(String.format("Bad request: %s", req.getUri()));
+		if (!req.decoderResult().isSuccess()) {
+			logger.warn(String.format("Bad request: %s", req.uri()));
 			sendHttpResponse(ctx, req, new DefaultFullHttpResponse(HTTP_1_1, BAD_REQUEST));
 			return;
 		}
 
 		// Allow only GET methods.
-		if (req.getMethod() != GET) {
-			logger.warn(String.format("Unsupported HTTP method: %s", req.getMethod()));
+		if (req.method() != GET) {
+			logger.warn(String.format("Unsupported HTTP method: %s", req.method()));
 			sendHttpResponse(ctx, req, new DefaultFullHttpResponse(HTTP_1_1, FORBIDDEN));
 			return;
 		}
@@ -114,12 +116,13 @@ class WebsocketSinkServerHandler extends SimpleChannelInboundHandler<Object> {
 
 		// Handshake
 		WebSocketServerHandshakerFactory wsFactory
-			= new WebSocketServerHandshakerFactory(getWebSocketLocation(req), null, true);
+				= new WebSocketServerHandshakerFactory(getWebSocketLocation(req), null, true);
 
 		handshaker = wsFactory.newHandshaker(req);
 		if (handshaker == null) {
 			WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(ctx.channel());
-		} else {
+		}
+		else {
 			handshaker.handshake(ctx.channel(), req);
 			WebsocketSinkServer.channels.add(ctx.channel());
 		}
@@ -140,7 +143,7 @@ class WebsocketSinkServerHandler extends SimpleChannelInboundHandler<Object> {
 		}
 		if (!(frame instanceof TextWebSocketFrame)) {
 			throw new UnsupportedOperationException(String.format("%s frame types not supported", frame.getClass()
-				.getName()));
+					.getName()));
 		}
 
 		// todo [om] think about BinaryWebsocketFrame
@@ -179,16 +182,16 @@ class WebsocketSinkServerHandler extends SimpleChannelInboundHandler<Object> {
 
 	private void sendHttpResponse(ChannelHandlerContext ctx, FullHttpRequest req, FullHttpResponse res) {
 		// Generate an error page if response getStatus code is not OK (200).
-		if (res.getStatus().code() != 200) {
-			ByteBuf buf = Unpooled.copiedBuffer(res.getStatus().toString(), CharsetUtil.UTF_8);
+		if (res.status().code() != 200) {
+			ByteBuf buf = Unpooled.copiedBuffer(res.status().toString(), CharsetUtil.UTF_8);
 			res.content().writeBytes(buf);
 			buf.release();
-			HttpHeaders.setContentLength(res, res.content().readableBytes());
+			HttpUtil.setContentLength(res, res.content().readableBytes());
 		}
 
 		// Send the response and close the connection if necessary.
 		ChannelFuture f = ctx.channel().writeAndFlush(res);
-		if (!HttpHeaders.isKeepAlive(req) || res.getStatus().code() != 200) {
+		if (!HttpUtil.isKeepAlive(req) || res.status().code() != 200) {
 			f.addListener(ChannelFutureListener.CLOSE);
 		}
 	}

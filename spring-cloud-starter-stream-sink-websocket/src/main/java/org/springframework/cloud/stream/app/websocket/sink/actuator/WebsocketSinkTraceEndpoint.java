@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 the original author or authors.
+ * Copyright 2014-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,19 +24,22 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.boot.actuate.endpoint.AbstractEndpoint;
+import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
+import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
 import org.springframework.boot.actuate.trace.Trace;
 import org.springframework.boot.actuate.trace.TraceRepository;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * simple {@link org.springframework.boot.actuate.endpoint.Endpoint} implementation that
+ * Simple Spring Boot Actuator {@link Endpoint} implementation that
  * provides access to Websocket messages last sent/received
  *
  * @author Oliver Moser
+ * @author Artem Bilan
  */
-@ConfigurationProperties(prefix = "endpoints.websocketsinktrace", ignoreUnknownFields = true)
-public class WebsocketSinkTraceEndpoint extends AbstractEndpoint<List<Trace>> {
+@ConfigurationProperties(prefix = "endpoints.websocketsinktrace")
+@Endpoint(id = "websocketsinktrace")
+public class WebsocketSinkTraceEndpoint {
 
 	private static final Log logger = LogFactory.getLog(WebsocketSinkTraceEndpoint.class);
 
@@ -45,21 +48,22 @@ public class WebsocketSinkTraceEndpoint extends AbstractEndpoint<List<Trace>> {
 	private final TraceRepository repository;
 
 	public WebsocketSinkTraceEndpoint(TraceRepository repository) {
-		super("websocketsinktrace");
 		this.repository = repository;
+		logger.info(String.format("/websocketsinktrace enabled: %b", enabled));
 	}
 
 	@PostConstruct
 	public void init() {
-		logger.info(String.format("/websocketsinktrace enabled: %b", enabled));
+
 	}
 
-	@Override
-	public List<Trace> invoke() {
+	@ReadOperation
+	public List<Trace> traces() {
 		return this.repository.findAll();
 	}
 
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
 	}
+
 }
