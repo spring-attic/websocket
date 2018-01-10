@@ -13,10 +13,11 @@
 	</parent>
 
 	<modules>
+		<module>spring-cloud-starter-stream-source-websocket</module>
 		<module>spring-cloud-starter-stream-sink-websocket</module>
 		<module>websocket-app-dependencies</module>
 	</modules>
-<profiles>
+	<profiles>
 		<profile>
 			<id>spring</id>
 			<repositories>
