@@ -16,11 +16,12 @@ Any
 N/A
 
 == Options
-The following commmand line arguments are supported:
+The following command line arguments are supported:
 
 //tag::configuration-properties[]
-$$websocket.path$$:: $$the path on which a WebsocketSource app listens. Default is <tt>/websocket</tt>$$ *($$String$$, default: `$$/websocket$$`)*
-$$server.port$$:: $$the port on which the Websocket server listens.
+$$websocket.allowed-origins$$:: $$The allowed origins. Default is <tt>*</tt>$$ *($$String$$, default: `$$*$$`)*
+$$websocket.path$$:: $$The path on which server WebSocket handler is exposed. Default is
+ <tt>/websocket</tt>$$ *($$String$$, default: `$$/websocket$$`)*
 //end::configuration-properties[]
 
 == Build
