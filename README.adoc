@@ -1,5 +1,7 @@
-# Websocket Sink
+# Websocket Source and Sink
 
 To learn more about this application and the supported properties, please review the following link.
+
+include::spring-cloud-starter-stream-source-websocket/README.adoc[]
 
 include::spring-cloud-starter-stream-sink-websocket/README.adoc[]
