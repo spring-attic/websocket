@@ -19,9 +19,9 @@ N/A
 The following command line arguments are supported:
 
 //tag::configuration-properties[]
-$$websocket.allowed-origins$$:: $$The allowed origins. Default is <tt>*</tt>$$ *($$String$$, default: `$$*$$`)*
-$$websocket.path$$:: $$The path on which server WebSocket handler is exposed. Default is
- <tt>/websocket</tt>$$ *($$String$$, default: `$$/websocket$$`)*
+$$websocket.allowed-origins$$:: $$The allowed origins.$$ *($$String$$, default: `$$*$$`)*
+$$websocket.path$$:: $$The path on which server WebSocket handler is exposed.$$ *($$String$$, default: `$$/websocket$$`)*
+$$websocket.sock-js.enable$$:: $$Enable SockJS service on the server. Default is 'false'$$ *($$Boolean$$, default: `$$false$$`)*
 //end::configuration-properties[]
 
 == Build
@@ -38,18 +38,18 @@ $ ./mvnw clean package
 ```
 
 == Examples
-To verify that the websocket-source receives messages from Websocket clients, you can use the
-following simple end-to-end setup.
+To verify that the websocket-source receives messages from Websocket clients, you can use the following simple end-to-end setup.
 
 
 === Step 1: Start kafka
 
 === Step 2: Deploy a `websocket-source` on a specific port, say 8080
 
-=== Step 3: Connect a websocket client on port 8080 path "/websocket", and send some messages. You can  start a kafka console consumer and see the messages there.
+=== Step 3: Connect a websocket client on port 8080 path "/websocket", and send some messages.
+You can  start a kafka console consumer and see the messages there.
 
 ```
-java -jar <spring boot application for websocket-source> --spring.cloud.stream.bindings.output.destination=ws-source-test --server.port=8080 
+java -jar <spring boot application for websocket-source> --spring.cloud.stream.bindings.output.destination=ws-source-test --server.port=8080
 
 ```
 

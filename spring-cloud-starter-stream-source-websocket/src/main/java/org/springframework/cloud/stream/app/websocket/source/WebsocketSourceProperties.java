@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2018 the original author or authors.
+ * Copyright 2018 the original author or authors.
  *
  * The Netty Project licenses this file to you under the Apache License,
  * version 2.0 (the "License"); you may not use this file except in compliance
@@ -23,6 +23,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * Configuration properties available for {@link WebsocketSourceConfiguration}
  *
  * @author Krishnaprasad A S
+ * @author Artem Bilan
  *
  */
 @ConfigurationProperties("websocket")
@@ -30,21 +31,25 @@ public class WebsocketSourceProperties {
 
 	public static final String DEFAULT_PATH = "/websocket";
 
-	private static final String DEFAULT_ALLOWED_ORIGINS = "*";
+	public static final String DEFAULT_ALLOWED_ORIGINS = "*";
 
 	/**
-	 * The path on which server WebSocket handler is exposed. Default is
-	 * <tt>/websocket</tt>
+	 * The path on which server WebSocket handler is exposed.
 	 */
-	String path = DEFAULT_PATH;
+	private String path = DEFAULT_PATH;
 
 	/**
-	 * The allowed origins. Default is <tt>*</tt>
+	 * The allowed origins.
 	 */
-	String allowedOrigins = DEFAULT_ALLOWED_ORIGINS;
+	private String allowedOrigins = DEFAULT_ALLOWED_ORIGINS;
+
+	/**
+	 * The SockJS options.
+	 */
+	private SockJs sockJs = new SockJs();
 
 	public String getPath() {
-		return path;
+		return this.path;
 	}
 
 	public void setPath(String path) {
@@ -52,11 +57,36 @@ public class WebsocketSourceProperties {
 	}
 
 	public String getAllowedOrigins() {
-		return allowedOrigins;
+		return this.allowedOrigins;
 	}
 
 	public void setAllowedOrigins(String allowedOrigins) {
 		this.allowedOrigins = allowedOrigins;
+	}
+
+	public SockJs getSockJs() {
+		return this.sockJs;
+	}
+
+	public void setSockJs(SockJs sockJs) {
+		this.sockJs = sockJs;
+	}
+
+	public static class SockJs {
+
+		/**
+		 * Enable SockJS service on the server. Default is 'false'
+		 */
+		private boolean enable;
+
+		public boolean getEnable() {
+			return this.enable;
+		}
+
+		public void setEnable(boolean enable) {
+			this.enable = enable;
+		}
+
 	}
 
 }

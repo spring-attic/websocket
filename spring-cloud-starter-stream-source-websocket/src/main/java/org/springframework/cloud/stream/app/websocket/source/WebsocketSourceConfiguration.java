@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2018 the original author or authors.
+ * Copyright 2018 the original author or authors.
  *
  * The Netty Project licenses this file to you under the Apache License,
  * version 2.0 (the "License"); you may not use this file except in compliance
@@ -17,7 +17,10 @@
 
 package org.springframework.cloud.stream.app.websocket.source;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.messaging.Source;
@@ -31,6 +34,7 @@ import org.springframework.integration.websocket.inbound.WebSocketInboundChannel
  * A source module that receives data over WebSocket
  *
  * @author Krishnaprasad A S
+ * @author Artem Bilan
  *
  */
 @Configuration
@@ -42,16 +46,30 @@ public class WebsocketSourceConfiguration {
 	private WebsocketSourceProperties properties;
 
 	@Bean
-	public WebSocketInboundChannelAdapter webSocketInboundChannelAdapter() {
-		WebSocketInboundChannelAdapter webSocketInboundChannelAdapter = new WebSocketInboundChannelAdapter(
-				serverWebSocketContainer());
-		webSocketInboundChannelAdapter.setOutputChannelName(Source.OUTPUT);
-		return webSocketInboundChannelAdapter;
+	@ConditionalOnMissingBean
+	@ConditionalOnProperty(prefix = "websocket.sockJs", name = "enable", havingValue = "true")
+	public ServerWebSocketContainer.SockJsServiceOptions sockJsServiceOptions() {
+		// TODO Expose SockJsServiceOptions as configuration properties
+		return new ServerWebSocketContainer.SockJsServiceOptions();
 	}
 
 	@Bean
-	public IntegrationWebSocketContainer serverWebSocketContainer() {
-		return new ServerWebSocketContainer(properties.getPath()).setAllowedOrigins(properties.getAllowedOrigins());
+	public IntegrationWebSocketContainer serverWebSocketContainer(
+			ObjectProvider<ServerWebSocketContainer.SockJsServiceOptions> sockJsServiceOptions) {
+
+		return new ServerWebSocketContainer(properties.getPath())
+				.setAllowedOrigins(properties.getAllowedOrigins())
+				.withSockJs(sockJsServiceOptions.getIfAvailable());
+	}
+
+	@Bean
+	public WebSocketInboundChannelAdapter webSocketInboundChannelAdapter(
+			IntegrationWebSocketContainer serverWebSocketContainer) {
+
+		WebSocketInboundChannelAdapter webSocketInboundChannelAdapter =
+				new WebSocketInboundChannelAdapter(serverWebSocketContainer);
+		webSocketInboundChannelAdapter.setOutputChannelName(Source.OUTPUT);
+		return webSocketInboundChannelAdapter;
 	}
 
 }
