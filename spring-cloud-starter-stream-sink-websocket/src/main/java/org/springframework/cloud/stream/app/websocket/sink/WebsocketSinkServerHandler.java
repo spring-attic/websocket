@@ -29,7 +29,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.boot.actuate.trace.TraceRepository;
+import org.springframework.cloud.stream.app.websocket.sink.trace.InMemoryTraceRepository;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -64,13 +64,13 @@ class WebsocketSinkServerHandler extends SimpleChannelInboundHandler<Object> {
 
 	private final boolean traceEnabled;
 
-	private final TraceRepository websocketTraceRepository;
+	private final InMemoryTraceRepository websocketTraceRepository;
 
 	private final WebsocketSinkProperties properties;
 
 	private WebSocketServerHandshaker handshaker;
 
-	public WebsocketSinkServerHandler(TraceRepository websocketTraceRepository,
+	public WebsocketSinkServerHandler(InMemoryTraceRepository websocketTraceRepository,
 			WebsocketSinkProperties properties,
 			boolean traceEnabled) {
 
@@ -118,12 +118,12 @@ class WebsocketSinkServerHandler extends SimpleChannelInboundHandler<Object> {
 		WebSocketServerHandshakerFactory wsFactory
 				= new WebSocketServerHandshakerFactory(getWebSocketLocation(req), null, true);
 
-		handshaker = wsFactory.newHandshaker(req);
-		if (handshaker == null) {
+		this.handshaker = wsFactory.newHandshaker(req);
+		if (this.handshaker == null) {
 			WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(ctx.channel());
 		}
 		else {
-			handshaker.handshake(ctx.channel(), req);
+			this.handshaker.handshake(ctx.channel(), req);
 			WebsocketSinkServer.channels.add(ctx.channel());
 		}
 	}
@@ -133,7 +133,7 @@ class WebsocketSinkServerHandler extends SimpleChannelInboundHandler<Object> {
 		// Check for closing frame
 		if (frame instanceof CloseWebSocketFrame) {
 			addTraceForFrame(frame, "close");
-			handshaker.close(ctx.channel(), (CloseWebSocketFrame) frame.retain());
+			this.handshaker.close(ctx.channel(), (CloseWebSocketFrame) frame.retain());
 			return;
 		}
 		if (frame instanceof PingWebSocketFrame) {
@@ -175,8 +175,8 @@ class WebsocketSinkServerHandler extends SimpleChannelInboundHandler<Object> {
 			trace.put("payload", ((TextWebSocketFrame) frame).text());
 		}
 
-		if (traceEnabled) {
-			websocketTraceRepository.add(trace);
+		if (this.traceEnabled) {
+			this.websocketTraceRepository.add(trace);
 		}
 	}
 
@@ -204,8 +204,8 @@ class WebsocketSinkServerHandler extends SimpleChannelInboundHandler<Object> {
 	}
 
 	private String getWebSocketLocation(FullHttpRequest req) {
-		String location = req.headers().get(HOST) + properties.getPath();
-		if (properties.isSsl()) {
+		String location = req.headers().get(HOST) + this.properties.getPath();
+		if (this.properties.isSsl()) {
 			return "wss://" + location;
 		}
 		else {

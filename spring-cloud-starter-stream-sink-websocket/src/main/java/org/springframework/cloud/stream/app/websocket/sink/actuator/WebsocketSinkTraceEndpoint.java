@@ -26,9 +26,9 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
-import org.springframework.boot.actuate.trace.Trace;
-import org.springframework.boot.actuate.trace.TraceRepository;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cloud.stream.app.websocket.sink.trace.InMemoryTraceRepository;
+import org.springframework.cloud.stream.app.websocket.sink.trace.Trace;
 
 /**
  * Simple Spring Boot Actuator {@link Endpoint} implementation that
@@ -45,11 +45,11 @@ public class WebsocketSinkTraceEndpoint {
 
 	private boolean enabled;
 
-	private final TraceRepository repository;
+	private final InMemoryTraceRepository repository;
 
-	public WebsocketSinkTraceEndpoint(TraceRepository repository) {
+	public WebsocketSinkTraceEndpoint(InMemoryTraceRepository repository) {
 		this.repository = repository;
-		logger.info(String.format("/websocketsinktrace enabled: %b", enabled));
+		logger.info(String.format("/websocketsinktrace enabled: %b", this.enabled));
 	}
 
 	@PostConstruct

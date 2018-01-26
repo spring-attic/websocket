@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 the original author or authors.
+ * Copyright 2014-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import javax.net.ssl.SSLException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.actuate.trace.TraceRepository;
+import org.springframework.cloud.stream.app.websocket.sink.trace.InMemoryTraceRepository;
 
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
@@ -44,12 +44,13 @@ import io.netty.handler.ssl.util.SelfSignedCertificate;
  *
  * @author Oliver Moser
  * @author Gary Russell
+ * @author Artem Bilan
  */
 public class WebsocketSinkServerInitializer extends ChannelInitializer<SocketChannel> {
 
 	public static final int MAX_CONTENT_LENGTH = 65536;
 
-	private final TraceRepository traceRepository;
+	private final InMemoryTraceRepository traceRepository;
 
 	@Autowired
 	private WebsocketSinkProperties properties;
@@ -57,7 +58,7 @@ public class WebsocketSinkServerInitializer extends ChannelInitializer<SocketCha
 	@Value("${endpoints.websocketsinktrace.enabled:false}")
 	private boolean traceEnabled;
 
-	public WebsocketSinkServerInitializer(TraceRepository traceRepository) {
+	public WebsocketSinkServerInitializer(InMemoryTraceRepository traceRepository) {
 		this.traceRepository = traceRepository;
 	}
 
@@ -72,15 +73,17 @@ public class WebsocketSinkServerInitializer extends ChannelInitializer<SocketCha
 
 		pipeline.addLast(new HttpServerCodec());
 		pipeline.addLast(new HttpObjectAggregator(MAX_CONTENT_LENGTH));
-		pipeline.addLast(new WebsocketSinkServerHandler(traceRepository, properties, traceEnabled));
+		pipeline.addLast(new WebsocketSinkServerHandler(this.traceRepository, this.properties, this.traceEnabled));
 	}
 
 	private SslContext configureSslContext() throws CertificateException, SSLException {
-		if (properties.isSsl()) {
+		if (this.properties.isSsl()) {
 			SelfSignedCertificate ssc = new SelfSignedCertificate();
 			return SslContextBuilder.forServer(ssc.certificate(), ssc.privateKey()).build();
-		} else {
+		}
+		else {
 			return null;
 		}
 	}
+
 }

@@ -1,6 +1,6 @@
 
 /*
- * Copyright 2014-2016 the original author or authors.
+ * Copyright 2014-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,12 +29,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.actuate.trace.InMemoryTraceRepository;
-import org.springframework.boot.actuate.trace.TraceRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.app.websocket.sink.actuator.WebsocketSinkTraceEndpoint;
+import org.springframework.cloud.stream.app.websocket.sink.trace.InMemoryTraceRepository;
 import org.springframework.cloud.stream.messaging.Sink;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -49,6 +48,7 @@ import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 /**
  * @author Oliver Moser
  * @author Gary Russell
+ * @author Artem Bilan
  */
 @Configuration
 @EnableConfigurationProperties(WebsocketSinkProperties.class)
@@ -57,13 +57,13 @@ public class WebsocketSinkConfiguration {
 
 	private static final Log logger = LogFactory.getLog(WebsocketSinkConfiguration.class);
 
+	private final InMemoryTraceRepository websocketTraceRepository = new InMemoryTraceRepository();
+
 	@Value("${endpoints.websocketsinktrace.enabled:false}")
 	private boolean traceEndpointEnabled;
 
-	private final TraceRepository websocketTraceRepository = new InMemoryTraceRepository();
-
 	@PostConstruct
-	public void init() throws InterruptedException, CertificateException, SSLException {
+	public void init() throws InterruptedException {
 		server().run();
 	}
 
@@ -74,19 +74,19 @@ public class WebsocketSinkConfiguration {
 
 	@Bean
 	public WebsocketSinkServerInitializer initializer() {
-		return new WebsocketSinkServerInitializer(websocketTraceRepository);
+		return new WebsocketSinkServerInitializer(this.websocketTraceRepository);
 	}
 
 	@Bean
 	@ConditionalOnProperty(value = "endpoints.websocketsinktrace.enabled", havingValue = "true")
 	public WebsocketSinkTraceEndpoint websocketTraceEndpoint() {
-		return new WebsocketSinkTraceEndpoint(websocketTraceRepository);
+		return new WebsocketSinkTraceEndpoint(this.websocketTraceRepository);
 	}
 
 	@ServiceActivator(inputChannel = Sink.INPUT)
 	public void websocketSink(Message<?> message) {
 		if (logger.isTraceEnabled()) {
-			logger.trace(String.format("Handling message: %s", message));
+			logger.trace("Handling message: " + message);
 		}
 
 		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(message);
@@ -101,7 +101,7 @@ public class WebsocketSinkConfiguration {
 			channel.flush();
 		}
 
-		if (traceEndpointEnabled) {
+		if (this.traceEndpointEnabled) {
 			addMessageToTraceRepository(message);
 		}
 	}
@@ -112,7 +112,7 @@ public class WebsocketSinkConfiguration {
 		trace.put("direction", "out");
 		trace.put("id", message.getHeaders().getId());
 		trace.put("payload", message.getPayload().toString());
-		websocketTraceRepository.add(trace);
+		this.websocketTraceRepository.add(trace);
 
 	}
 
