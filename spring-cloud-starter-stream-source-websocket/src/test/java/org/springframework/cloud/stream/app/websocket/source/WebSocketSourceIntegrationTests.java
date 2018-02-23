@@ -22,20 +22,23 @@ import static org.junit.Assert.assertThat;
 import static org.springframework.cloud.stream.test.matcher.MessageQueueMatcher.receivesPayloadThat;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.cloud.stream.messaging.Source;
 import org.springframework.cloud.stream.test.binder.MessageCollector;
+import org.springframework.http.HttpHeaders;
 import org.springframework.integration.websocket.ClientWebSocketContainer;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.util.Base64Utils;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
@@ -49,8 +52,7 @@ import org.springframework.web.socket.client.standard.StandardWebSocketClient;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-		properties = {
-				"websocket.path=/some_websocket_path" })
+		properties = "websocket.path=/some_websocket_path")
 @DirtiesContext
 public class WebSocketSourceIntegrationTests {
 
@@ -62,6 +64,9 @@ public class WebSocketSourceIntegrationTests {
 
 	@Autowired
 	protected MessageCollector messageCollector;
+
+	@Autowired
+	private SecurityProperties securityProperties;
 
 	@LocalServerPort
 	private String port;
@@ -78,9 +83,21 @@ public class WebSocketSourceIntegrationTests {
 	public void testWebSocketStreamSource() throws IOException {
 		StandardWebSocketClient webSocketClient = new StandardWebSocketClient();
 		ClientWebSocketContainer clientWebSocketContainer =
-				new ClientWebSocketContainer(webSocketClient,
-						"ws://localhost:" + this.port + "/" + this.properties.getPath());
+				new ClientWebSocketContainer(webSocketClient, "ws://localhost:{port}{path}",
+						this.port,
+						this.properties.getPath());
+
+		HttpHeaders httpHeaders = new HttpHeaders();
+
+		String token = Base64Utils.encodeToString(
+				(this.securityProperties.getUser().getName() + ":" + this.securityProperties.getUser().getPassword())
+						.getBytes(StandardCharsets.UTF_8));
+		httpHeaders.set(HttpHeaders.AUTHORIZATION, "Basic " + token);
+
+		clientWebSocketContainer.setHeaders(httpHeaders);
+
 		clientWebSocketContainer.start();
+
 		WebSocketSession session = clientWebSocketContainer.getSession(null);
 		session.sendMessage(new TextMessage(this.messageString));
 		assertThat(this.messageCollector.forChannel(this.channels.output()),
@@ -88,7 +105,7 @@ public class WebSocketSourceIntegrationTests {
 		session.close();
 	}
 
-	@SpringBootApplication(exclude = SecurityAutoConfiguration.class)
+	@SpringBootApplication
 	public static class WebsocketSourceApplication {
 
 	}
