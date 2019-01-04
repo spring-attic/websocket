@@ -108,7 +108,7 @@ public class WebsocketSinkIntegrationTests {
 
 		// submit a single message
 		String payload = UUID.randomUUID().toString();
-		sink.input().send(MessageBuilder.withPayload(payload).build());
+		sink.input().send(MessageBuilder.withPayload(payload.getBytes()).build());
 
 		// await completion on each handler
 		for (WebsocketSinkClientHandler handler : handlers) {
@@ -152,7 +152,7 @@ public class WebsocketSinkIntegrationTests {
 		for (int i = 0; i < messageCount; i++) {
 			String message = "message_" + i;
 			messagesToSend.add(message);
-			sink.input().send(MessageBuilder.withPayload(message).build());
+			sink.input().send(MessageBuilder.withPayload(message.getBytes()).build());
 		}
 
 		return messagesToSend;

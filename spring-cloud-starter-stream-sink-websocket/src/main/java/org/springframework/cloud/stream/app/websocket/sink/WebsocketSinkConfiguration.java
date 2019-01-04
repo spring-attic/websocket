@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.stream.annotation.EnableBinding;
+import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.cloud.stream.app.websocket.sink.actuator.WebsocketSinkTraceEndpoint;
 import org.springframework.cloud.stream.app.websocket.sink.trace.InMemoryTraceRepository;
 import org.springframework.cloud.stream.messaging.Sink;
@@ -83,7 +84,7 @@ public class WebsocketSinkConfiguration {
 		return new WebsocketSinkTraceEndpoint(this.websocketTraceRepository);
 	}
 
-	@ServiceActivator(inputChannel = Sink.INPUT)
+	@StreamListener(Sink.INPUT)
 	public void websocketSink(Message<?> message) {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Handling message: " + message);
