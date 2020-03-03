@@ -58,6 +58,7 @@
 					<generatedApps>
 						<websocket-sink/>
 					</generatedApps>
+					<enableContainerImageMetadata>true</enableContainerImageMetadata>
 				</configuration>
 			</plugin>
 		</plugins>
